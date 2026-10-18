@@ -52,7 +52,33 @@ for dir in "${dirs[@]}"; do
             pass=$((pass + 1))
         else
             echo "[FAIL] $name"
-            diff -u --label expected --label actual "$expected" "$actual" | head -20
+            awk '
+                FILENAME == ARGV[1] {
+                    output[++output_count] = $0
+                    if (length($0) > output_width) output_width = length($0)
+                    next
+                }
+                {
+                    expected[++expected_count] = $0
+                    if (length($0) > expected_width) expected_width = length($0)
+                }
+                END {
+                    if (output_width < 6) output_width = 6
+                    if (expected_width < 8) expected_width = 8
+                    border = "+-"
+                    for (i = 0; i < output_width; i++) border = border "-"
+                    border = border "-+-"
+                    for (i = 0; i < expected_width; i++) border = border "-"
+                    border = border "-+"
+                    print border
+                    printf "| %-*s | %-*s |\n", output_width, "Output", expected_width, "Expected"
+                    print border
+                    count = output_count > expected_count ? output_count : expected_count
+                    for (i = 1; i <= count; i++)
+                        printf "| %-*s | %-*s |\n", output_width, output[i], expected_width, expected[i]
+                    print border
+                }
+            ' "$actual" "$expected"
             fail=$((fail + 1))
         fi
         rm -f "$actual"

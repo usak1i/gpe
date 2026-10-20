@@ -17,7 +17,7 @@ int main() {
             cin >> x[i] >> y[i];
         }
 
-        // Ax + By = C
+        // Ax + By + C = 0
         // straight line : A(x2 - x1) + B(y2 -y1) = 0, A = dy, B = -dx
         set<tuple<long long, long long, long long>> lines;
         for (int i = 0; i < len; i++) {
